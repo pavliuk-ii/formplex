@@ -20,41 +20,101 @@ model User {
   hash String
   displayName String
 
-  posts Post[] @relation("UserPosts")
-  likes Like[] @relation("UserLikes")
+  createdForms Form[] @relation("UserCreatedForms")
+  formResponses FormResponse[] @relation("UserFormResponses")
 
   @@map("users")
 }
 
-model Post {
+enum QuestionType {
+  CHECKBOX
+  RADIOBUTTON
+  SHORT_ANSWER
+  PARAGRAPH
+  LINIAR_SCALE
+  CHOICE_GRID
+  CHECKBOX_GRID
+}
+
+model Form {
   id Int @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  userId Int
+  user User @relation("UserCreatedForms", fields: [userId], references: [id], onDelete: Cascade)
+
+  title String
+  description String?
+  url String @unique
+  isAnonymous Boolean @default(true)
+
+  questions Question[] @relation("FormQuestions")
+  formResponses FormResponse[] @relation("FormFormResponses")
+
+  @@map("forms")
+}
+
+model Question {
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  formId Int
+  form Form @relation("FormQuestions", fields: [formId], references: [id], onDelete: Cascade)
+
+  type QuestionType
+  text String
+  isRequired Boolean @default(false)
+
+
+  options Option[] @relation("QuestionOptions")
+
+  @@map("questions")
+}
+
+model Option {
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  questionId Int
+  question Question @relation("QuestionOptions", fields: [questionId], references: [id], onDelete: Cascade)
 
   text String
 
-  userId Int
-  user User @relation("UserPosts", fields: [userId], references: [id], onDelete: Cascade)
+  responses QuestionResponse[] @relation("OptionQuestionResponses")
 
-  replyToId Int?
-  replyTo Post? @relation("PostReplies", fields: [replyToId], references: [id], onDelete: Cascade)
-  replies Post[] @relation("PostReplies")
-
-  likes Like[] @relation("PostLikes")
-
-  @@map("posts")
+  @@map("options")
 }
 
-model Like {
+model FormResponse {
   id Int @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  formId Int
+  form Form @relation("FormFormResponses", fields: [formId], references: [id], onDelete: Cascade)
   userId Int
-  user User @relation("UserLikes", fields: [userId], references: [id], onDelete: Cascade)
-  postId Int
-  post Post @relation("PostLikes", fields: [postId], references: [id], onDelete: Cascade)
-  @@unique(name: "likesUserPostUnique", fields: [userId, postId])
+  user User @relation("UserFormResponses", fields: [userId], references: [id], onDelete: Cascade)
 
-  @@map("likes")
+  questionResponses QuestionResponse[] @relation("FormResponseQuestionResponses")
+
+  @@map("form_responses")
+}
+
+model QuestionResponse {
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  formReponseId Int
+  formReponse FormResponse @relation("FormResponseQuestionResponses", fields: [formReponseId], references: [id], onDelete: Cascade)
+
+  optionId Int?
+  option Option? @relation("OptionQuestionResponses", fields: [optionId], references: [id], onDelete: Cascade)
+
+  text String?
+
+  @@map("question_responses")
 }
