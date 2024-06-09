@@ -11,16 +11,16 @@ datasource db {
 }
 
 model User {
-  id Int @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  username String @unique
-  email String @unique
-  hash String
+  username    String @unique
+  email       String @unique
+  hash        String
   displayName String
 
-  createdForms Form[] @relation("UserCreatedForms")
+  createdForms  Form[]         @relation("UserCreatedForms")
   formResponses FormResponse[] @relation("UserFormResponses")
 
   @@map("users")
@@ -37,36 +37,40 @@ enum QuestionType {
 }
 
 model Form {
-  id Int @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   userId Int
-  user User @relation("UserCreatedForms", fields: [userId], references: [id], onDelete: Cascade)
+  user   User @relation("UserCreatedForms", fields: [userId], references: [id], onDelete: Cascade)
 
-  title String
+  title       String
   description String?
-  url String @unique
-  isAnonymous Boolean @default(true)
+  url         String  @unique
 
-  questions Question[] @relation("FormQuestions")
+  isPublished Boolean @default(false)
+
+  isAnonymous      Boolean @default(true)
+  shuffleQuestions Boolean @default(false)
+  shuffleAnswers   Boolean @default(false)
+
+  questions     Question[]     @relation("FormQuestions")
   formResponses FormResponse[] @relation("FormFormResponses")
 
   @@map("forms")
 }
 
 model Question {
-  id Int @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   formId Int
-  form Form @relation("FormQuestions", fields: [formId], references: [id], onDelete: Cascade)
+  form   Form @relation("FormQuestions", fields: [formId], references: [id], onDelete: Cascade)
 
-  type QuestionType
-  text String
-  isRequired Boolean @default(false)
-
+  type       QuestionType
+  text       String
+  isRequired Boolean      @default(false)
 
   options Option[] @relation("QuestionOptions")
 
@@ -74,12 +78,12 @@ model Question {
 }
 
 model Option {
-  id Int @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   questionId Int
-  question Question @relation("QuestionOptions", fields: [questionId], references: [id], onDelete: Cascade)
+  question   Question @relation("QuestionOptions", fields: [questionId], references: [id], onDelete: Cascade)
 
   text String
 
@@ -89,14 +93,14 @@ model Option {
 }
 
 model FormResponse {
-  id Int @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   formId Int
-  form Form @relation("FormFormResponses", fields: [formId], references: [id], onDelete: Cascade)
-  userId Int
-  user User @relation("UserFormResponses", fields: [userId], references: [id], onDelete: Cascade)
+  form   Form  @relation("FormFormResponses", fields: [formId], references: [id], onDelete: Cascade)
+  userId Int?
+  user   User? @relation("UserFormResponses", fields: [userId], references: [id], onDelete: Cascade)
 
   questionResponses QuestionResponse[] @relation("FormResponseQuestionResponses")
 
@@ -104,15 +108,15 @@ model FormResponse {
 }
 
 model QuestionResponse {
-  id Int @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  formReponseId Int
-  formReponse FormResponse @relation("FormResponseQuestionResponses", fields: [formReponseId], references: [id], onDelete: Cascade)
+  formResponseId Int
+  formResponse   FormResponse @relation("FormResponseQuestionResponses", fields: [formResponseId], references: [id], onDelete: Cascade)
 
   optionId Int?
-  option Option? @relation("OptionQuestionResponses", fields: [optionId], references: [id], onDelete: Cascade)
+  option   Option? @relation("OptionQuestionResponses", fields: [optionId], references: [id], onDelete: Cascade)
 
   text String?
 

@@ -1,10 +1,9 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { Injectable, ForbiddenException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as argon from 'argon2';
-
 import { PrismaService } from '../prisma/prisma.service';
-import { SignInDto, SignUpDto } from './dto';
+import { SignInDto, SignUpDto, UpdateUserDto } from './dto';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
 @Injectable()
@@ -13,7 +12,7 @@ export class AuthService {
     private prisma: PrismaService,
     private jwt: JwtService,
     private config: ConfigService,
-  ) {}
+  ) { }
 
   async signup(dto: SignUpDto) {
     const hash = await argon.hash(dto.password);
@@ -56,7 +55,7 @@ export class AuthService {
   async signToken(
     userId: number,
     email: string,
-  ): Promise<{ accessToken:  string }> {
+  ): Promise<{ accessToken: string; }> {
     const payload = {
       sub: userId,
       email,
@@ -72,5 +71,25 @@ export class AuthService {
     return {
       accessToken: token,
     };
+  }
+
+  async updateUser(userId: number, dto: UpdateUserDto) {
+    try {
+      const user = await this.prisma.user.update({
+        where: { id: userId },
+        data: {
+          ...dto,
+        },
+      });
+      delete user.hash;
+      return user;
+    } catch (error) {
+      if (error instanceof PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          throw new ForbiddenException('Credentials taken');
+        }
+      }
+      throw error;
+    }
   }
 }
