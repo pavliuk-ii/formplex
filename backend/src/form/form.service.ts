@@ -1,6 +1,6 @@
-import { Injectable, ForbiddenException } from '@nestjs/common';
+import { Injectable, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateFormDto, UpdateFormDto, PublishFormDto } from './dto';
+import { CreateFormDto, UpdateFormDto, PublishFormDto, CreateResponseDto } from './dto';
 
 @Injectable()
 export class FormService {
@@ -100,6 +100,68 @@ export class FormService {
     return this.prisma.form.update({
       where: { id: formId },
       data: { isPublished: dto.isPublished },
+    });
+  }
+
+  async submitResponse(userId: number | null, formId: number, dto: CreateResponseDto) {
+    const form = await this.prisma.form.findUnique({
+      where: { id: formId },
+      include: {
+        questions: {
+          include: {
+            options: true,
+          },
+        },
+      },
+    });
+
+    if (!form || !form.isPublished) {
+      throw new ForbiddenException('Form is not available');
+    }
+
+    if (!form.isAnonymous && !userId) {
+      throw new ForbiddenException('User must be logged in to submit this form');
+    }
+
+    const requiredQuestions = form.questions.filter(q => q.isRequired);
+    const answeredQuestions = new Set(dto.answers.map(a => a.questionId));
+    const missingQuestions = requiredQuestions.filter(q => !answeredQuestions.has(q.id));
+
+    if (missingQuestions.length > 0) {
+      throw new BadRequestException('Not all required questions were answered');
+    }
+
+    const response = await this.prisma.formResponse.create({
+      data: {
+        userId,
+        formId,
+        answers: {
+          create: dto.answers.map(answer => ({
+            questionId: answer.questionId,
+            optionId: answer.optionId,
+            text: answer.text,
+          })),
+        },
+      },
+    });
+
+    return response;
+  }
+
+  async getResponsesByFormOwner(userId: number, formId: number) {
+    const form = await this.prisma.form.findUnique({
+      where: { id: formId },
+    });
+
+    if (!form || form.userId !== userId) {
+      throw new ForbiddenException('Access to this form is denied');
+    }
+
+    return this.prisma.formResponse.findMany({
+      where: { formId },
+      include: {
+        answers: true,
+      },
     });
   }
 }

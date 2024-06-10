@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Param, Patch, Post, UseGuards, ParseIntPipe } from '@nestjs/common';
 import { QuestionService } from './question.service';
 import { CreateQuestionDto, UpdateQuestionDto } from './dto';
 import { GetUser } from '../auth/decorator/get-user.decorator';
@@ -12,7 +12,7 @@ export class QuestionController {
   @Post()
   addQuestionToForm(
     @GetUser('id') userId: number,
-    @Param('formId') formId: number,
+    @Param('formId', ParseIntPipe) formId: number,
     @Body() dto: CreateQuestionDto
   ) {
     return this.questionService.addQuestionToForm(userId, formId, dto);
@@ -21,8 +21,8 @@ export class QuestionController {
   @Patch(':questionId')
   updateQuestion(
     @GetUser('id') userId: number,
-    @Param('formId') formId: number,
-    @Param('questionId') questionId: number,
+    @Param('formId', ParseIntPipe) formId: number,
+    @Param('questionId', ParseIntPipe) questionId: number,
     @Body() dto: UpdateQuestionDto
   ) {
     return this.questionService.updateQuestion(userId, formId, questionId, dto);
@@ -31,8 +31,8 @@ export class QuestionController {
   @Delete(':questionId')
   deleteQuestion(
     @GetUser('id') userId: number,
-    @Param('formId') formId: number,
-    @Param('questionId') questionId: number
+    @Param('formId', ParseIntPipe) formId: number,
+    @Param('questionId', ParseIntPipe) questionId: number
   ) {
     return this.questionService.deleteQuestion(userId, formId, questionId);
   }

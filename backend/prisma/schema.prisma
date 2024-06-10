@@ -48,8 +48,7 @@ model Form {
   description String?
   url         String  @unique
 
-  isPublished Boolean @default(false)
-
+  isPublished      Boolean @default(false)
   isAnonymous      Boolean @default(true)
   shuffleQuestions Boolean @default(false)
   shuffleAnswers   Boolean @default(false)
@@ -72,7 +71,8 @@ model Question {
   text       String
   isRequired Boolean      @default(false)
 
-  options Option[] @relation("QuestionOptions")
+  options   Option[]           @relation("QuestionOptions")
+  responses QuestionResponse[] @relation("QuestionResponses")
 
   @@map("questions")
 }
@@ -114,6 +114,9 @@ model QuestionResponse {
 
   formResponseId Int
   formResponse   FormResponse @relation("FormResponseQuestionResponses", fields: [formResponseId], references: [id], onDelete: Cascade)
+
+  questionId Int
+  question   Question @relation("QuestionResponses", fields: [questionId], references: [id], onDelete: Cascade)
 
   optionId Int?
   option   Option? @relation("OptionQuestionResponses", fields: [optionId], references: [id], onDelete: Cascade)
