@@ -1,26 +1,31 @@
 import React from 'react';
-import logo from './logo.svg';
+import { Routes, Route } from 'react-router-dom';
+import Navbar from './components/Navbar';
+import Sidebar from './components/Sidebar';
+import Home from './pages/Home';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import MyForms from './pages/MyForms';
+import FilledForms from './pages/FilledForms';
+import { Container, Box } from '@mui/material';
 import './App.css';
 
-function App() {
+const App: React.FC = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Box sx={{ display: 'flex' }}>
+      <Navbar />
+      <Sidebar />
+      <Container component="main" sx={{ mt: 8, ml: 2, flexGrow: 1 }}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/my-forms" element={<MyForms />} />
+          <Route path="/filled-forms" element={<FilledForms />} />
+        </Routes>
+      </Container>
+    </Box>
   );
-}
+};
 
 export default App;
