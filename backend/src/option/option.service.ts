@@ -1,12 +1,12 @@
 import { Injectable, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateQuestionDto, UpdateQuestionDto } from './dto';
+import { CreateOptionDto, UpdateOptionDto } from './dto';
 
 @Injectable()
-export class QuestionService {
+export class OptionService {
   constructor(private prisma: PrismaService) { }
 
-  async addQuestionToForm(userId: number, formId: number, dto: CreateQuestionDto) {
+  async addOptionToQuestion(userId: number, formId: number, questionId: number, dto: CreateOptionDto) {
     const form = await this.prisma.form.findUnique({
       where: { id: formId },
     });
@@ -15,15 +15,23 @@ export class QuestionService {
       throw new ForbiddenException('Access to this form is denied');
     }
 
-    return this.prisma.question.create({
+    const question = await this.prisma.question.findUnique({
+      where: { id: questionId },
+    });
+
+    if (!question || question.formId !== formId) {
+      throw new ForbiddenException('Access to this question is denied');
+    }
+
+    return this.prisma.option.create({
       data: {
         ...dto,
-        formId,
+        questionId,
       },
     });
   }
 
-  async updateQuestion(userId: number, formId: number, questionId: number, dto: UpdateQuestionDto) {
+  async updateOption(userId: number, formId: number, questionId: number, optionId: number, dto: UpdateOptionDto) {
     const form = await this.prisma.form.findUnique({
       where: { id: formId },
     });
@@ -40,13 +48,21 @@ export class QuestionService {
       throw new ForbiddenException('Access to this question is denied');
     }
 
-    return this.prisma.question.update({
-      where: { id: questionId },
+    const option = await this.prisma.option.findUnique({
+      where: { id: optionId },
+    });
+
+    if (!option || option.questionId !== questionId) {
+      throw new ForbiddenException('Access to this option is denied');
+    }
+
+    return this.prisma.option.update({
+      where: { id: optionId },
       data: { ...dto },
     });
   }
 
-  async deleteQuestion(userId: number, formId: number, questionId: number) {
+  async deleteOption(userId: number, formId: number, questionId: number, optionId: number) {
     const form = await this.prisma.form.findUnique({
       where: { id: formId },
     });
@@ -63,8 +79,16 @@ export class QuestionService {
       throw new ForbiddenException('Access to this question is denied');
     }
 
-    return this.prisma.question.delete({
-      where: { id: questionId },
+    const option = await this.prisma.option.findUnique({
+      where: { id: optionId },
+    });
+
+    if (!option || option.questionId !== questionId) {
+      throw new ForbiddenException('Access to this option is denied');
+    }
+
+    return this.prisma.option.delete({
+      where: { id: optionId },
     });
   }
 }

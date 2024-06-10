@@ -1,7 +1,5 @@
-import { IsString, IsOptional, IsBoolean, IsEnum, IsArray, ValidateNested, IsInt } from 'class-validator';
-import { Type } from 'class-transformer';
+import { IsString, IsOptional, IsBoolean, IsEnum, IsInt } from 'class-validator';
 import { QuestionType } from '@prisma/client';
-import { UpdateOptionDto } from './update-option.dto';
 
 export class UpdateQuestionDto {
   @IsInt()
@@ -18,10 +16,4 @@ export class UpdateQuestionDto {
   @IsOptional()
   @IsBoolean()
   isRequired?: boolean;
-
-  @IsOptional()
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => UpdateOptionDto)
-  options?: UpdateOptionDto[];
 }

@@ -1,7 +1,5 @@
-import { IsString, IsBoolean, IsEnum, IsArray, ValidateNested } from 'class-validator';
-import { Type } from 'class-transformer';
+import { IsString, IsBoolean, IsEnum } from 'class-validator';
 import { QuestionType } from '@prisma/client';
-import { CreateOptionDto } from '../../form/dto/create-option.dto';
 
 export class CreateQuestionDto {
   @IsEnum(QuestionType)
@@ -12,9 +10,4 @@ export class CreateQuestionDto {
 
   @IsBoolean()
   isRequired: boolean;
-
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => CreateOptionDto)
-  options: CreateOptionDto[];
 }

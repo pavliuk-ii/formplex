@@ -1,6 +1,4 @@
-import { IsString, IsOptional, IsBoolean, IsArray, ValidateNested } from 'class-validator';
-import { Type } from 'class-transformer';
-import { UpdateQuestionDto } from './update-question.dto';
+import { IsString, IsOptional, IsBoolean } from 'class-validator';
 
 export class UpdateFormDto {
   @IsOptional()
@@ -16,8 +14,6 @@ export class UpdateFormDto {
   isAnonymous?: boolean;
 
   @IsOptional()
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => UpdateQuestionDto)
-  questions?: UpdateQuestionDto[];
+  @IsBoolean()
+  isPublished?: boolean;
 }
