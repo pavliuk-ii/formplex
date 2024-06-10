@@ -133,12 +133,12 @@ export class FormService {
 
     const response = await this.prisma.formResponse.create({
       data: {
-        userId,
-        formId,
-        answers: {
+        user: userId ? { connect: { id: userId } } : undefined,
+        form: { connect: { id: formId } },
+        questionResponses: {
           create: dto.answers.map(answer => ({
-            questionId: answer.questionId,
-            optionId: answer.optionId,
+            question: { connect: { id: answer.questionId } },
+            option: answer.optionId ? { connect: { id: answer.optionId } } : undefined,
             text: answer.text,
           })),
         },
@@ -160,7 +160,7 @@ export class FormService {
     return this.prisma.formResponse.findMany({
       where: { formId },
       include: {
-        answers: true,
+        questionResponses: true,
       },
     });
   }
