@@ -1,4 +1,4 @@
-import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards, Patch } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards, Patch, Get } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignInDto, SignUpDto, UpdateUserDto } from './dto';
 import { GetUser } from './decorator/get-user.decorator';
@@ -24,5 +24,11 @@ export class AuthController {
   @UseGuards(AuthGuard('jwt'))
   updateUser(@GetUser('id') userId: number, @Body() dto: UpdateUserDto) {
     return this.authService.updateUser(userId, dto);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('user')
+  async getUser(@GetUser('id') userId: number): Promise<Omit<User, 'hash'>> {
+    return this.authService.getUserById(userId);
   }
 }

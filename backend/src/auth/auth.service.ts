@@ -5,6 +5,7 @@ import * as argon from 'argon2';
 import { PrismaService } from '../prisma/prisma.service';
 import { SignInDto, SignUpDto, UpdateUserDto } from './dto';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -91,5 +92,18 @@ export class AuthService {
       }
       throw error;
     }
+  }
+
+  async getUserById(userId: number): Promise<Omit<User, 'hash'>> {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+    if (user) {
+      const { hash, ...result } = user;
+      return result;
+    }
+    return null;
   }
 }

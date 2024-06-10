@@ -1,11 +1,12 @@
 import React from 'react';
-import { Typography } from '@mui/material';
+import { Typography, Box } from '@mui/material';
 
 const FilledForms: React.FC = () => {
   return (
-    <div>
-      <Typography variant="h4">Filled Forms</Typography>
-    </div>
+    <Box>
+      <Typography variant="h4" sx={{ mb: 2 }}>Пройдені форми</Typography>
+      {/* Додайте логіку для відображення пройдених форм */}
+    </Box>
   );
 };
 

@@ -1,26 +1,40 @@
 import React from 'react';
-import { Drawer, List, ListItem, ListItemText } from '@mui/material';
+import { Box, List, ListItem, ListItemIcon, ListItemText, Divider } from '@mui/material';
+import HomeIcon from '@mui/icons-material/Home';
+import DescriptionIcon from '@mui/icons-material/Description';
+import EditIcon from '@mui/icons-material/Edit';
 import { Link } from 'react-router-dom';
 
 const Sidebar: React.FC = () => {
   return (
-    <Drawer
-      variant="permanent"
+    <Box
       sx={{
-        width: 240,
-        flexShrink: 0,
-        [`& .MuiDrawer-paper`]: { width: 240, boxSizing: 'border-box' },
+        width: 260,
+        borderRight: '1px solid rgba(0, 0, 0, 0.12)',
       }}
     >
       <List>
         <ListItem button component={Link} to="/my-forms">
+          <ListItemIcon>
+            <HomeIcon />
+          </ListItemIcon>
           <ListItemText primary="Мої форми" />
         </ListItem>
         <ListItem button component={Link} to="/filled-forms">
-          <ListItemText primary="Заповнені форми" />
+          <ListItemIcon>
+            <DescriptionIcon />
+          </ListItemIcon>
+          <ListItemText primary="Пройдені форми" />
+        </ListItem>
+        <Divider />
+        <ListItem button component={Link} to="/edit-user">
+          <ListItemIcon>
+            <EditIcon />
+          </ListItemIcon>
+          <ListItemText primary="Редагувати користувача" />
         </ListItem>
       </List>
-    </Drawer>
+    </Box>
   );
 };
 
