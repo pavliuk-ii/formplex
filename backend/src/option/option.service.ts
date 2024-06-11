@@ -6,9 +6,9 @@ import { CreateOptionDto, UpdateOptionDto } from './dto';
 export class OptionService {
   constructor(private prisma: PrismaService) { }
 
-  async addOptionToQuestion(userId: number, formId: number, questionId: number, dto: CreateOptionDto) {
+  async addOptionToQuestion(userId: number, formUrl: string, questionId: number, dto: CreateOptionDto) {
     const form = await this.prisma.form.findUnique({
-      where: { id: formId },
+      where: { url: formUrl },
     });
 
     if (!form || form.userId !== userId) {
@@ -19,7 +19,7 @@ export class OptionService {
       where: { id: questionId },
     });
 
-    if (!question || question.formId !== formId) {
+    if (!question || question.formId !== form.id) {
       throw new ForbiddenException('Access to this question is denied');
     }
 
@@ -31,9 +31,9 @@ export class OptionService {
     });
   }
 
-  async updateOption(userId: number, formId: number, questionId: number, optionId: number, dto: UpdateOptionDto) {
+  async updateOption(userId: number, formUrl: string, questionId: number, optionId: number, dto: UpdateOptionDto) {
     const form = await this.prisma.form.findUnique({
-      where: { id: formId },
+      where: { url: formUrl },
     });
 
     if (!form || form.userId !== userId) {
@@ -44,7 +44,7 @@ export class OptionService {
       where: { id: questionId },
     });
 
-    if (!question || question.formId !== formId) {
+    if (!question || question.formId !== form.id) {
       throw new ForbiddenException('Access to this question is denied');
     }
 
@@ -62,9 +62,9 @@ export class OptionService {
     });
   }
 
-  async deleteOption(userId: number, formId: number, questionId: number, optionId: number) {
+  async deleteOption(userId: number, formUrl: string, questionId: number, optionId: number) {
     const form = await this.prisma.form.findUnique({
-      where: { id: formId },
+      where: { url: formUrl },
     });
 
     if (!form || form.userId !== userId) {
@@ -75,7 +75,7 @@ export class OptionService {
       where: { id: questionId },
     });
 
-    if (!question || question.formId !== formId) {
+    if (!question || question.formId !== form.id) {
       throw new ForbiddenException('Access to this question is denied');
     }
 

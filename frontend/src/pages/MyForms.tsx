@@ -35,7 +35,8 @@ const MyForms: React.FC = () => {
 
   const handleCreateForm = async () => {
     try {
-      const response = await axios.post(
+      // Створення форми
+      const formResponse = await axios.post(
         'http://localhost:3333/forms',
         { title: 'Нова форма', description: '', isAnonymous: true },
         {
@@ -44,12 +45,38 @@ const MyForms: React.FC = () => {
           },
         }
       );
-      navigate(`/edit-form/${response.data.url}`);
+
+      const formUrl = formResponse.data.url;
+
+      const questionResponse = await axios.post(
+        `http://localhost:3333/forms/${formUrl}/questions`,
+        { text: 'Текст запитання 1', type: 'RADIOBUTTON', isRequired: false },
+        {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          },
+        }
+      );
+
+      const questionId = questionResponse.data.id;
+
+      await axios.post(
+        `http://localhost:3333/forms/${formUrl}/questions/${questionId}/options`,
+        { text: 'Варіант 1' },
+        {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          },
+        }
+      );
+
+      navigate(`/edit-form/${formUrl}`);
     } catch (error) {
       console.error('Failed to create form', error);
       enqueueSnackbar('Помилка при створенні форми', { variant: 'error' });
     }
   };
+
 
   const handleTogglePublish = async (formUrl: string, isPublished: boolean) => {
     try {
@@ -60,8 +87,7 @@ const MyForms: React.FC = () => {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
           },
-        },
-      );
+        });
       setForms(forms.map(form => form.url === formUrl ? { ...form, isPublished } : form));
       enqueueSnackbar('Налаштування публікації змінено', { variant: 'success' });
     } catch (error) {

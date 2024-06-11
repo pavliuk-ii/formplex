@@ -19,10 +19,10 @@ const Home: React.FC = () => {
     >
       <CheckBoxIcon sx={{ fontSize: 120, mb: 1, color: '#1976d2' }} />
       <Typography variant="h2" sx={{ mb: 1 }}>
-        <span style={{ color: '#1976d2' }}>Formplex</span> - швидкий
+        Швидкий та простий
       </Typography>
       <Typography variant="h2" sx={{ mb: 7 }}>
-        та зручний конструктор форм
+        <span style={{ color: '#1976d2' }}>конструктор форм</span>
       </Typography>
       <Box sx={{ display: 'flex', gap: 4, width: '100%', justifyContent: 'center', mb: 6 }}>
         <Button

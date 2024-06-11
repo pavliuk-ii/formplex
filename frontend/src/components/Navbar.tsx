@@ -40,7 +40,7 @@ const Navbar: React.FC<NavbarProps> = ({ onLogout }) => {
       <Toolbar>
         <Button component={Link} to="/" sx={{ display: 'flex', alignItems: 'center', textTransform: 'none', color: 'inherit' }}>
           <CheckBoxIcon sx={{ mr: 1 }} />
-          <Typography variant="h6">Formplex</Typography>
+          <Typography variant="h6">Форми</Typography>
         </Button>
         <Box sx={{ flexGrow: 1 }} />
         {isAuthenticated ? (

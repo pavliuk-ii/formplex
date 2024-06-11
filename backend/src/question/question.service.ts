@@ -6,9 +6,9 @@ import { CreateQuestionDto, UpdateQuestionDto } from './dto';
 export class QuestionService {
   constructor(private prisma: PrismaService) { }
 
-  async addQuestionToForm(userId: number, formId: number, dto: CreateQuestionDto) {
+  async addQuestionToForm(userId: number, formUrl: string, dto: CreateQuestionDto) {
     const form = await this.prisma.form.findUnique({
-      where: { id: formId },
+      where: { url: formUrl },
     });
 
     if (!form || form.userId !== userId) {
@@ -18,14 +18,14 @@ export class QuestionService {
     return this.prisma.question.create({
       data: {
         ...dto,
-        formId,
+        formId: form.id,
       },
     });
   }
 
-  async updateQuestion(userId: number, formId: number, questionId: number, dto: UpdateQuestionDto) {
+  async updateQuestion(userId: number, formUrl: string, questionId: number, dto: UpdateQuestionDto) {
     const form = await this.prisma.form.findUnique({
-      where: { id: formId },
+      where: { url: formUrl },
     });
 
     if (!form || form.userId !== userId) {
@@ -36,7 +36,7 @@ export class QuestionService {
       where: { id: questionId },
     });
 
-    if (!question || question.formId !== formId) {
+    if (!question || question.formId !== form.id) {
       throw new ForbiddenException('Access to this question is denied');
     }
 
@@ -46,9 +46,9 @@ export class QuestionService {
     });
   }
 
-  async deleteQuestion(userId: number, formId: number, questionId: number) {
+  async deleteQuestion(userId: number, formUrl: string, questionId: number) {
     const form = await this.prisma.form.findUnique({
-      where: { id: formId },
+      where: { url: formUrl },
     });
 
     if (!form || form.userId !== userId) {
@@ -59,7 +59,7 @@ export class QuestionService {
       where: { id: questionId },
     });
 
-    if (!question || question.formId !== formId) {
+    if (!question || question.formId !== form.id) {
       throw new ForbiddenException('Access to this question is denied');
     }
 
