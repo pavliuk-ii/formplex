@@ -1,92 +1,158 @@
-import React, { useState, useEffect } from 'react';
-import { Typography, Button, Box, List, ListItem, ListItemText, IconButton, Modal } from '@mui/material';
-import { Link as RouterLink } from 'react-router-dom';
-import { Delete, Publish, Unpublished } from '@mui/icons-material';
+import React, { useEffect, useState } from 'react';
+import { Box, Typography, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Switch, IconButton, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
+import { Delete as DeleteIcon } from '@mui/icons-material';
+import axios from 'axios';
+import { useSnackbar } from 'notistack';
+import { useNavigate } from 'react-router-dom';
 
 interface Form {
   id: number;
   title: string;
   updatedAt: string;
+  url: string;
   isPublished: boolean;
 }
 
 const MyForms: React.FC = () => {
   const [forms, setForms] = useState<Form[]>([]);
-  const [selectedForm, setSelectedForm] = useState<number | null>(null);
-  const [openModal, setOpenModal] = useState(false);
+  const [selectedForm, setSelectedForm] = useState<Form | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const { enqueueSnackbar } = useSnackbar();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    fetch('http://localhost:3333/forms')
-      .then(response => response.json())
-      .then(data => {
-        if (Array.isArray(data)) {
-          setForms(data);
-        } else {
-          console.error('Received data is not an array:', data);
-        }
-      })
-      .catch(error => console.error('Error fetching forms:', error));
+    const fetchForms = async () => {
+      const response = await axios.get('http://localhost:3333/forms', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+      setForms(response.data);
+    };
+
+    fetchForms();
   }, []);
 
-  const handleDelete = (formId: number) => {
-    setOpenModal(true);
-    setSelectedForm(formId);
+  const handleCreateForm = async () => {
+    try {
+      const response = await axios.post(
+        'http://localhost:3333/forms',
+        { title: 'Нова форма', description: '', isAnonymous: true },
+        {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          },
+        }
+      );
+      navigate(`/edit-form/${response.data.url}`);
+    } catch (error) {
+      console.error('Failed to create form', error);
+      enqueueSnackbar('Помилка при створенні форми', { variant: 'error' });
+    }
   };
 
-  const confirmDelete = () => {
-    fetch(`http://localhost:3333/forms/${selectedForm}`, { method: 'DELETE' })
-      .then(() => {
-        setForms(forms.filter((form: Form) => form.id !== selectedForm));
-        setOpenModal(false);
-        setSelectedForm(null);
-      })
-      .catch(error => console.error('Error deleting form:', error));
+  const handleTogglePublish = async (formUrl: string, isPublished: boolean) => {
+    try {
+      await axios.patch(
+        `http://localhost:3333/forms/${formUrl}/publish`,
+        { isPublished },
+        {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          },
+        },
+      );
+      setForms(forms.map(form => form.url === formUrl ? { ...form, isPublished } : form));
+      enqueueSnackbar('Налаштування публікації змінено', { variant: 'success' });
+    } catch (error) {
+      console.error('Failed to update publication status', error);
+      enqueueSnackbar('Помилка при зміні налаштувань публікації', { variant: 'error' });
+    }
   };
 
-  const handlePublish = (formId: number) => {
-    fetch(`http://localhost:3333/forms/${formId}/publish`, { method: 'PATCH' })
-      .then(() => {
-        setForms(forms.map((form: Form) => form.id === formId ? { ...form, isPublished: !form.isPublished } : form));
-      })
-      .catch(error => console.error('Error publishing form:', error));
+  const handleDeleteClick = (form: Form) => {
+    setSelectedForm(form);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (selectedForm) {
+      try {
+        await axios.delete(`http://localhost:3333/forms/${selectedForm.url}`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          },
+        });
+        setForms(forms.filter(form => form.url !== selectedForm.url));
+        enqueueSnackbar('Форму видалено', { variant: 'success' });
+      } catch (error) {
+        console.error('Failed to delete form', error);
+        enqueueSnackbar('Помилка при видаленні форми', { variant: 'error' });
+      }
+      setIsDeleteDialogOpen(false);
+      setSelectedForm(null);
+    }
   };
 
   return (
-    <Box>
-      <Typography variant="h4" sx={{ mb: 2 }}>Мої форми</Typography>
-      <Button variant="contained" color="primary" component={RouterLink} to="/create-form" sx={{ mb: 2 }}>
-        Створити
-      </Button>
-      <List>
-        {forms.sort((a: Form, b: Form) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()).map((form: Form) => (
-          <ListItem key={form.id} sx={{ display: 'flex', justifyContent: 'space-between' }}>
-            <ListItemText
-              primary={form.title}
-              secondary={`Востаннє відредаговано: ${new Date(form.updatedAt).toLocaleDateString()}`}
-            />
-            <Box>
-              <IconButton onClick={() => handlePublish(form.id)}>
-                {form.isPublished ? <Unpublished /> : <Publish />}
-              </IconButton>
-              <IconButton onClick={() => handleDelete(form.id)}>
-                <Delete />
-              </IconButton>
-            </Box>
-          </ListItem>
-        ))}
-      </List>
-      <Modal open={openModal} onClose={() => setOpenModal(false)}>
-        <Box sx={{ p: 4, backgroundColor: 'white', borderRadius: '4px', boxShadow: 24 }}>
-          <Typography variant="h6">Видалити форму?</Typography>
-          <Typography sx={{ mb: 2 }}>Ця дія не може бути скасована.</Typography>
-          <Button variant="contained" color="primary" onClick={confirmDelete} sx={{ mr: 2 }}>
-            Видалити
-          </Button>
-          <Button variant="outlined" color="secondary" onClick={() => setOpenModal(false)}>
+    <Box sx={{ p: 4 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+        <Typography variant="h4">Мої форми</Typography>
+        <Button variant="contained" color="primary" onClick={handleCreateForm}>
+          Створити нову форму
+        </Button>
+      </Box>
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow sx={{ backgroundColor: '#f0f0f0' }}>
+              <TableCell>Назва форми</TableCell>
+              <TableCell>Дата останнього редагування</TableCell>
+              <TableCell>Опубліковано</TableCell>
+              <TableCell></TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {forms.map((form) => (
+              <TableRow key={form.id}>
+                <TableCell onClick={() => navigate(`/edit-form/${form.url}`)}>{form.title.length > 50 ? form.title.substring(0, 50) + '...' : form.title}</TableCell>
+                <TableCell onClick={() => navigate(`/edit-form/${form.url}`)}>{new Date(form.updatedAt).toLocaleString()}</TableCell>
+                <TableCell>
+                  <Switch
+                    checked={form.isPublished}
+                    onChange={(e) => handleTogglePublish(form.url, e.target.checked)}
+                  />
+                </TableCell>
+                <TableCell>
+                  <IconButton onClick={() => handleDeleteClick(form)}>
+                    <DeleteIcon />
+                  </IconButton>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      <Dialog
+        open={isDeleteDialogOpen}
+        onClose={() => setIsDeleteDialogOpen(false)}
+      >
+        <DialogTitle>Видалити форму</DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ color: 'text.primary' }}>
+            Ви впевнені, що хочете видалити форму "{selectedForm?.title}"? Цю дію не можна буде скасувати.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setIsDeleteDialogOpen(false)} color="primary">
             Скасувати
           </Button>
-        </Box>
-      </Modal>
+          <Button onClick={handleDeleteConfirm} color="primary" autoFocus>
+            Видалити
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

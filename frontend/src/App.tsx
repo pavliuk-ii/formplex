@@ -8,6 +8,7 @@ import Register from './pages/Register';
 import MyForms from './pages/MyForms';
 import FilledForms from './pages/FilledForms';
 import EditUser from './pages/EditUser';
+import EditForm from './pages/EditForm';
 import { Container, Box, ThemeProvider } from '@mui/material';
 import theme from './theme';
 import { SnackbarProvider, useSnackbar } from 'notistack';
@@ -50,6 +51,7 @@ const App: React.FC = () => {
                 <Route path="/my-forms" element={isAuthenticated ? <MyForms /> : <Navigate to="/login" />} />
                 <Route path="/filled-forms" element={isAuthenticated ? <FilledForms /> : <Navigate to="/login" />} />
                 <Route path="/edit-user" element={isAuthenticated ? <EditUser /> : <Navigate to="/login" />} />
+                <Route path="/edit-form/:url" element={isAuthenticated ? <EditForm /> : <Navigate to="/login" />} />
               </Routes>
             </Container>
           </Box>

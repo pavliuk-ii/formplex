@@ -36,9 +36,9 @@ export class FormService {
     });
   }
 
-  async getFormById(userId: number, formId: number) {
+  async getFormByUrl(userId: number, formUrl: string) {
     const form = await this.prisma.form.findUnique({
-      where: { id: formId },
+      where: { url: formUrl },
       include: {
         questions: {
           include: {
@@ -55,9 +55,9 @@ export class FormService {
     return form;
   }
 
-  async updateForm(userId: number, formId: number, dto: UpdateFormDto) {
+  async updateForm(userId: number, formUrl: string, dto: UpdateFormDto) {
     const form = await this.prisma.form.findUnique({
-      where: { id: formId },
+      where: { url: formUrl },
     });
 
     if (!form || form.userId !== userId) {
@@ -65,7 +65,7 @@ export class FormService {
     }
 
     return this.prisma.form.update({
-      where: { id: formId },
+      where: { url: formUrl },
       data: {
         title: dto.title,
         description: dto.description,
@@ -74,9 +74,9 @@ export class FormService {
     });
   }
 
-  async deleteForm(userId: number, formId: number) {
+  async deleteForm(userId: number, formUrl: string) {
     const form = await this.prisma.form.findUnique({
-      where: { id: formId },
+      where: { url: formUrl },
     });
 
     if (!form || form.userId !== userId) {
@@ -84,13 +84,13 @@ export class FormService {
     }
 
     return this.prisma.form.delete({
-      where: { id: formId },
+      where: { url: formUrl },
     });
   }
 
-  async publishForm(userId: number, formId: number, dto: PublishFormDto) {
+  async publishForm(userId: number, formUrl: string, dto: PublishFormDto) {
     const form = await this.prisma.form.findUnique({
-      where: { id: formId },
+      where: { url: formUrl },
     });
 
     if (!form || form.userId !== userId) {
@@ -98,14 +98,14 @@ export class FormService {
     }
 
     return this.prisma.form.update({
-      where: { id: formId },
+      where: { url: formUrl },
       data: { isPublished: dto.isPublished },
     });
   }
 
-  async submitResponse(userId: number | null, formId: number, dto: CreateResponseDto) {
+  async submitResponse(userId: number | null, formUrl: string, dto: CreateResponseDto) {
     const form = await this.prisma.form.findUnique({
-      where: { id: formId },
+      where: { url: formUrl },
       include: {
         questions: {
           include: {
@@ -134,7 +134,7 @@ export class FormService {
     const response = await this.prisma.formResponse.create({
       data: {
         user: userId ? { connect: { id: userId } } : undefined,
-        form: { connect: { id: formId } },
+        form: { connect: { id: form.id } },
         questionResponses: {
           create: dto.answers.map(answer => ({
             question: { connect: { id: answer.questionId } },
@@ -148,9 +148,9 @@ export class FormService {
     return response;
   }
 
-  async getResponsesByFormOwner(userId: number, formId: number) {
+  async getResponsesByFormOwner(userId: number, formUrl: string) {
     const form = await this.prisma.form.findUnique({
-      where: { id: formId },
+      where: { url: formUrl },
     });
 
     if (!form || form.userId !== userId) {
@@ -158,7 +158,7 @@ export class FormService {
     }
 
     return this.prisma.formResponse.findMany({
-      where: { formId },
+      where: { formId: form.id },
       include: {
         questionResponses: true,
       },

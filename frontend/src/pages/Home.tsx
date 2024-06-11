@@ -11,7 +11,7 @@ const Home: React.FC = () => {
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',
-        height: 'calc(100vh - 64px)', // Віднімаємо висоту навбару
+        height: 'calc(100vh - 64px)',
         mt: 0,
         boxSizing: 'border-box',
         textAlign: 'center',

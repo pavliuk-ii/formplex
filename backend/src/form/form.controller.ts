@@ -21,53 +21,53 @@ export class FormController {
   }
 
   @UseGuards(AuthGuard('jwt'))
-  @Get(':formId')
-  getFormById(@GetUser('id') userId: number, @Param('formId', ParseIntPipe) formId: number) {
-    return this.formService.getFormById(userId, formId);
+  @Get(':formUrl')
+  getFormById(@GetUser('id') userId: number, @Param('formUrl') formUrl: string) {
+    return this.formService.getFormByUrl(userId, formUrl);
   }
 
   @UseGuards(AuthGuard('jwt'))
-  @Patch(':formId')
-  updateForm(@GetUser('id') userId: number, @Param('formId', ParseIntPipe) formId: number, @Body() dto: UpdateFormDto) {
-    return this.formService.updateForm(userId, formId, dto);
+  @Patch(':formUrl')
+  updateForm(@GetUser('id') userId: number, @Param('formUrl') formUrl: string, @Body() dto: UpdateFormDto) {
+    return this.formService.updateForm(userId, formUrl, dto);
   }
 
   @UseGuards(AuthGuard('jwt'))
-  @Patch(':formId/publish')
-  publishForm(@GetUser('id') userId: number, @Param('formId', ParseIntPipe) formId: number, @Body() dto: PublishFormDto) {
-    return this.formService.publishForm(userId, formId, dto);
+  @Patch(':formUrl/publish')
+  publishForm(@GetUser('id') userId: number, @Param('formUrl') formUrl: string, @Body() dto: PublishFormDto) {
+    return this.formService.publishForm(userId, formUrl, dto);
   }
 
   @UseGuards(AuthGuard('jwt'))
-  @Delete(':formId')
-  deleteForm(@GetUser('id') userId: number, @Param('formId', ParseIntPipe) formId: number) {
-    return this.formService.deleteForm(userId, formId);
+  @Delete(':formUrl')
+  deleteForm(@GetUser('id') userId: number, @Param('formUrl') formUrl: string) {
+    return this.formService.deleteForm(userId, formUrl);
   }
 
   @UseGuards(AuthGuard('jwt'))
-  @Post(':formId/responses')
+  @Post(':formUrl/responses')
   submitResponse(
     @GetUser('id') userId: number,
-    @Param('formId', ParseIntPipe) formId: number,
+    @Param('formUrl') formUrl: string,
     @Body() dto: CreateResponseDto
   ) {
-    return this.formService.submitResponse(userId, formId, dto);
+    return this.formService.submitResponse(userId, formUrl, dto);
   }
 
-  @Post(':formId/responses/anonymous')
+  @Post(':formUrl/responses/anonymous')
   submitAnonymousResponse(
-    @Param('formId', ParseIntPipe) formId: number,
+    @Param('formUrl') formUrl: string,
     @Body() dto: CreateResponseDto
   ) {
-    return this.formService.submitResponse(null, formId, dto);
+    return this.formService.submitResponse(null, formUrl, dto);
   }
 
   @UseGuards(AuthGuard('jwt'))
-  @Get(':formId/responses')
+  @Get(':formUrl/responses')
   getResponsesByFormOwner(
     @GetUser('id') userId: number,
-    @Param('formId', ParseIntPipe) formId: number
+    @Param('formUrl') formUrl: string
   ) {
-    return this.formService.getResponsesByFormOwner(userId, formId);
+    return this.formService.getResponsesByFormOwner(userId, formUrl);
   }
 }
